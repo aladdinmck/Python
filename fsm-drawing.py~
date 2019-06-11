@@ -42,36 +42,11 @@ class FlowerBotSim:
                               
                   self.draw()
             pygame.quit()
-'''            
-# Plant Line                                                                                        
-canvas.create_line(75,170,399,170)                                              
-# Plants                                                 
-canvas.create_line(75,165,75,175)                                                         
-canvas.create_line(111,165,111,175)                                                               
-canvas.create_line(147,165,147,175)                                                           
-canvas.create_line(183,165,183,175)                                           
-canvas.create_line(219,165,219,175)                                      
-canvas.create_line(255,165,255,175)                                    
-canvas.create_line(291,165,291,175)                                                        
-canvas.create_line(327,165,327,175)
-canvas.create_line(363,165,363,175)                                                    
-canvas.create_line(399,165,399,175) 
-   '''         
+            
       def draw(self):
             self.win.blit(self.bg, (0,0))
             pygame.draw.rect(self.win, (255,215,0), [30, 190, 50, 50])
-
-            # Plants
-            pygame.draw.line(self.win, (0,0,0), (75,170),(399,170) , 2)
-
-            pygame.draw.line(self.win, (0,0,0), (111,165),(111,175) , 2)
-            pygame.draw.line(self.win, (0,0,0), (147,165),(147,175) , 2)
-            pygame.draw.line(self.win, (0,0,0), (183,165),(183,175) , 2)
-            pygame.draw.line(self.win, (0,0,0), (219,165),(219,175) , 2)
-            pygame.draw.line(self.win, (0,0,0), (255,165),(255,175) , 2)
-            pygame.draw.line(self.win, (0,0,0), (291,165),(291,175) , 2)
-            pygame.draw.line(self.win, (0,0,0), (327,165),(327,175) , 2)
-            pygame.draw.line(self.win, (0,0,0), (363,165),(363,175) , 2)
+            pygame.draw.line(self.win, (0,0,0), (25,170),(25,75) , 2)
             for p in self.clicks:
                   pygame.draw.circle(self.win, (255,0,0), (p[0], p[1], 5, 0))
             pygame.display.update()
