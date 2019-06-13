@@ -1,0 +1,19 @@
+
+
+# Circumference in cm
+circum = 17.954
+
+# Movement in cm
+def move_y(dist):
+    rot = dist / circum
+    vel = rot / time
+    dynaY1(-vel)
+    dynaY2(vel)
+
+def move_x(dist):
+    rot = dist / circum
+    vel = rot / time
+    dynaX1(vel)
+    dynaX2(-vel)
+
+move_y(10)
