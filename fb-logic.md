@@ -51,15 +51,16 @@ pos = 0
 
 plantArr [] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
+if (camera == green)
+	plantArr[pos] = 1
+	pos++
+	plantCount++
+
 if (camera == red)
 	plantArr[pos] = 2
 	pos++
 	plantCount++
 
-if (camera == green)
-	plantArr[pos] = 1
-	pos++
-	plantCount++
 ```
 
 We will have a dynamic and static array to know where the plant is located on the robot.
@@ -107,16 +108,16 @@ then 5 red plants.
 greenCount = 5
 redCount = 5
 
-while (redCount > 0)
-	if (plantArr[pos] == 2):
-		drop()
-		redCount--
-		plantArr[pos] = 0
-
 while (greenCount > 0)
 	if (plantArr[pos] == 1):
 		drop()
 		greenCount--
+		plantArr[pos] = 0
+
+while (redCount > 0)
+	if (plantArr[pos] == 2):
+		drop()
+		redCount--
 		plantArr[pos] = 0
 	
 ```
