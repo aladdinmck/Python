@@ -5,13 +5,9 @@ from time import clock
 # ======= # 
 # Globals #
 # ======= #
-nplants    = 0
-spaces     = 0
-Gcount     = 0
-Rcount     = 0
+nplants     = 0
 up         = False
 drop       = False
-dropped    = False
 horizontal = False
 plants     = [0] * 10
 pStr     = 'R G G G R R G R G R'
@@ -67,7 +63,6 @@ class Moving(State):
         global horizontal
         global up
         global drop
-        global spaces
         if (nplants < 10):
             motor.move_lateral(200)
             print('////////////////////////////////////')
@@ -93,15 +88,13 @@ class Moving(State):
             drop = True
             if not (randint(1,3) % 2):
                 self.FSM.ToTransition('toCorrection')
-        elif ((nplants == 10) and drop and ((Gcount + Rcount) < 10)):
+        elif ((nplants == 10) and drop):
             print('##################################')            
             print('######### CREATING SPACE #########')
             print('##################################')
             self.FSM.ToTransition('toDrop')
         else:
-            print('##################################')
-            print('############ FINISHED ############')
-            print('##################################')
+            print('Nothing')
     def Exit(self):
         print('Stopped.')
         
@@ -116,8 +109,6 @@ class Grab(State):
         global horizontal
         print('Grabbing...')
         nplants += 1
-        # REMOVE THIS 10
-        nplants = 10
         print('GRABBED PLANT: ' + str(nplants))
         if (nplants == 10):
             horizontal = True
@@ -135,48 +126,27 @@ class Drop(State):
         super(Drop, self).Enter()
     def Execute(self):
         global plants
-        global dropped
-        global Gcount
-        global Rcount
         print('Dropping...')
-        print(plants)
+        
         # drops 5 green plants and
         # replaces them with a 0
         for i, val in enumerate(plants):
-            dropped = False
             if (val == 'G'):
                 print (i, ",",val)
-                print('##################################')
-                print('########## GREEN DROPPED #########')                 
-                print('##################################')
+                print('GREEN DROPPED') 
+                
                 plants[i] = '0'
                 print(plants)
-                dropped = True
-                Gcount += 1
-            if (dropped):
-                break
 
-        print('##################################')
-        print('######## MOVE TO RED AREA ########')                 
-        print('##################################')
-                
         # drops 5 red plants and
         # replaces them with a 0
         for i, val in enumerate(plants):
-            dropped = False
-            if (val == 'R' and (Gcount == 5)):
+            if (val == 'R'):
                 print (i, ",", val)
-                print('##################################')
-                print('########## RED DROPPED ###########')                 
-                print('##################################')                
-                # move here
+                print('RED DROPPED')
+        # move here
                 plants[i] = '0'
                 print(plants)
-                dropped = True
-                Rcount += 1
-            if (dropped):
-                break
-
         self.FSM.ToTransition('toCorrection')
     def Exit(self):
         print('Finished dropping')
