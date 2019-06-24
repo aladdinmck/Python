@@ -69,7 +69,7 @@ class Moving(State):
         global drop
         global spaces
         if (nplants < 10):
-            motor.move_lateral()
+            motor.custom_move(0, 0, 1000, 8000, 0, 0)
             print('////////////////////////////////////')
             print('////////// MOVING FORWARD //////////')
             print('////////////////////////////////////')
@@ -79,13 +79,15 @@ class Moving(State):
             if (randint(4, 6) % 2):
                 self.FSM.ToTransition('toGrab')
         elif ((nplants == 10) and horizontal):
+            motor.custom_move(0, 0, 1000, 30000, 0, 0)
             print('################################')
             print('########## MOVING UP ###########')
             print('################################')
             horizontal = False
             up = True
             if not (randint(1,3) % 2):
-                self.FSM.ToTransition('toCorrection')
+                print(' ')
+               #self.FSM.ToTransition('toCorrection')
         elif ((nplants == 10) and up):
             print('##################################')
             print('##########  MOVING BACK ##########')
