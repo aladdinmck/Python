@@ -12,8 +12,8 @@ while(1):
     _, frame = cap.read()  
     # Converts images from BGR to HSV 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV) 
-    lower_red = np.array([50,100,50]) 
-    upper_red = np.array([255,150,255]) 
+    lower_red = np.array([50,110,50]) 
+    upper_red = np.array([255,130,255]) 
 
     lower_green = np.array([110, 50, 50])
     upper_green = np.array([130, 255, 255])
