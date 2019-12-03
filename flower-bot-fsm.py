@@ -1,6 +1,23 @@
+import motors as motors
 from random import randint
 from time import clock 
-plants = 0
+import time as time
+
+# ======= # 
+# Globals #
+# ======= #
+nplants    = 1
+spaces     = 0
+Gcount     = 0
+Rcount     = 0
+up         = False
+drop       = False
+dropped    = False
+horizontal = False
+plants     = [0] * 10
+pStr     = 'R G G G R R G R G R'
+
+plants     = pStr.split(' ')
 
 # Transition
 class Transition(object):
@@ -12,6 +29,7 @@ class Transition(object):
 
 # States
 class State(object):
+    global nplants
     def __init__(self, FSM):
         self.FSM = FSM
         self.timer = 0
@@ -32,11 +50,7 @@ class Correction(State):
         super(Correction, self).Enter()
     def Execute(self):
         print('Correcting...')
-        if (self.startTime + self.timer <= clock()):
-            if not (randint(1,3) % 2):
-                self.FSM.ToTransition('toMoving')
-            else:
-                self.FSM.ToTransition('toMoving')
+        self.FSM.ToTransition('toMoving')
     def Exit(self):
         print('Finished Correcting.')
 
@@ -47,54 +61,144 @@ class Moving(State):
         print('Preparing to move.')
         super(Moving, self).Enter()
     def Execute(self):
-        if (plants < 10):
-            print('Moving forward')
-            if not (randint(1,3) % 2):
-                self.FSM.ToTransition('toCorrection')
-            if (randint(4, 6) % 2):
-                self.FSM.ToTransition('toGrab')
-        elif ((plants > 10) and horzontal):
-            print('Moving up')
-            if not (randint(1,3) % 2):
-                self.FSM.ToTransition('toCorrection')
-        elif ((plants > 10) and horzontal and up):
-            print('Moving backward')
-            if not (randint(1,3) % 2):
-                self.FSM.ToTransition('toCorrection')
-        elif ((plants > 10) and horizontal and up and drop):
-            print('Moving forward')
-            if not (randint(1,3) % 2):
-                self.FSM.ToTransition('toCorrection')
-            if (randint(4, 6) % 2):
-                self.FSM.ToTransition('toDrop')
+	global horizontal
+        global up
+        global drop
+        global spaces
+        # ///////////////////////////////////////////////////////
+        # THESE TRUTHS WILL JUMP TO DROP - REMOVE THESE WHEN DONE 
+        # ///////////////////////////////////////////////////////
+        horizontal = False
+        up         = False
+        drop       = True
+        nplants = 10
+        if (nplants < 10):
+            motors.move_lateral(-600, 4000)
+            time.sleep(3)
+            print('////////////////////////////////////')
+            print('////////// MOVING FORWARD //////////')
+            print('////////////////////////////////////')       
+            self.FSM.ToTransition('toGrab')
+            horizontal = True
+        elif ((nplants == 10) and horizontal):
+            motors.move_vertical(600, 14500)
+            time.sleep(10)  
+            print('################################')
+            print('          MOVING UP ') 
+            print('################################')
+            horizontal = False
+            up = True
+        elif ((nplants == 10) and up):
+            print('##################################')
+            print('            MOVING BACK ')
+            print('##################################')
+            motors.move_lateral(600, 25000)
+	    time.sleep(15)
+            motors.move_lateral(600, 22000)
+            time.sleep(12)
+            up = False
+            drop = True
+        elif ((nplants == 10) and drop and ((Gcount + Rcount) < 10)):
+            print('##################################')            
+            print('          CREATING SPACE ')
+            print('##################################')
+            motors.move_lateral(-600, 2500)
+            time.sleep(3)
+            self.FSM.ToTransition('toDrop')
         else:
-            print('Nothing')
+            print('##################################')
+            print('             FINISHED ')
+            print('##################################')
     def Exit(self):
         print('Stopped.')
         
 class Grab(State):
-    
     def __init__(self, FSM):
         super(Grab, self).__init__(FSM)
     def Enter(self):
         print('Stopped by ultra-sonic.')
         super(Grab, self).Enter()
     def Execute(self):
+        global nplants
+        global horizontal
         print('Grabbing...')
-        self.FSM.ToTransition('toCorrection')
+        nplants += 1
+        # REMOVE THIS 10
+        # nplants = 10
+        print('GRABBED PLANT: ' + str(nplants))
+        motors.open_grabber(0)
+        time.sleep(2)
+        motors.move_chain(800, 4000)
+        time.sleep(2)
+        motors.close_grabber(0)
+        time.sleep(2)
+        motors.move_chain(800, 4000)
+        time.sleep(2)
+        self.FSM.ToTransition('toMoving')
     def Exit(self):
         print('Grabbed plant.')
         
 
 class Drop(State):
+    global plants
     def __init__(self, FSM):
         super(Drop, self).__init__(FSM)
     def Enter(self):
         print('Stopped to drop.')
         super(Drop, self).Enter()
     def Execute(self):
+        global plants
+        global dropped
+        global Gcount
+        global Rcount
         print('Dropping...')
-        self.FSM.ToTransition('toCorrection')
+        print(plants)
+        # drops 5 green plants and
+        # replaces them with a 0
+        for i, val in enumerate(plants):
+            dropped = False
+            if (val == 'G'):
+                motors.open_grabber(i)
+                time.sleep(2)
+                print('##################################')
+                print('  GREEN GRABBER', i ,' OPENED ')                 
+                print('##################################')
+                motors.move_lateral(-600, 4000)
+                time.sleep(2)
+                plants[i] = '0'
+                print(plants)
+                Gcount += 1
+                if (Gcount == 5):
+                    dropped = True 
+            if (dropped):
+                break
+
+        print('##################################')
+        print('        MOVE TO RED AREA')                 
+        print('##################################')
+        motors.move_lateral(-600, 2500)
+        time.sleep(2)
+        # drops 5 red plants and
+        # replaces them with a 0
+        for i, val in enumerate(plants):
+            dropped = False
+            if (val == 'R' and (Gcount == 5)):
+                motors.open_grabber(i)
+                time.sleep(2)
+                print('##################################')
+                print('  RED GRABBER ', i ,' OPENED ')                 
+                print('##################################')                
+                motors.move_lateral(-600, 4000)
+                time.sleep(2)
+                # move here
+                plants[i] = '0'
+                print(plants)
+                Rcount += 1
+                if (Rcount == 5):
+                    dropped = True
+            if (dropped):
+                break
+            self.FSM.ToTransition('toCorrection')
     def Exit(self):
         print('Finished dropping')
 
@@ -109,80 +213,12 @@ class Initial(State):
         
     def Execute(self):
         print('ON')
-        if (self.startTime + self.timer <= clock()):
-            if not (randint(1,3) %2):
-                self.FSM.ToTransition('toCorrection')
-            else:
-                self.FSM.ToTransition('toCorrection')
-
-    def Exit(self):
-        print('Initial move up.')
-
-# Finite State Machines
-class FSM(object):
-    def __init__(self, character):
-        self.char = character
-        self.states = {}
-        self.transitions = {}
-        self.curState = None
-        self.prevState = None # Prevents two states from looping   
-        self.trans = None
-
-    def AddTransition(self, transName, transition):
-        self.transitions[transName] = transition
-
-    def AddState(self, stateName, state):
-        self.states[stateName] = state
-
-    def SetState(self, stateName):
-        self.prevState = self.curState
-        self.curState = self.states[stateName]
-
-    def ToTransition(self, toTrans):
-        self.trans = self.transitions[toTrans]
-
-    def Execute(self):
-        if (self.trans):
-            self.curState.Exit()
-            self.trans.Execute()
-            self.SetState(self.trans.toState)
-            self.curState.Enter()
-            self.trans = None
-        self.curState.Execute()
-
-# Implementation                                                                                          
-Char = type('Char', (object,), {})
-
-class FlowerBot(Char):
-    def __init__(self):
-        self.FSM = FSM(self)
-
-        # States                                                                                                
-        self.FSM.AddState('Initial', Initial(self.FSM))
-        self.FSM.AddState('Correction', Correction(self.FSM))
-        self.FSM.AddState('Moving', Moving(self.FSM))
-        self.FSM.AddState('Grab', Grab(self.FSM))
-        self.FSM.AddState('Drop', Drop(self.FSM))
-
-        # Transitions                                                                                           
-        self.FSM.AddTransition('toInitial', Transition('Initial'))
-        self.FSM.AddTransition('toCorrection', Transition('Correction'))
-        self.FSM.AddTransition('toMoving', Transition('Moving'))
-        self.FSM.AddTransition('toGrab', Transition('Grab'))
-        self.FSM.AddTransition('toDrop', Transition('Drop'))
-
-        self.FSM.SetState('Initial')
-
-    def Execute(self):
-        self.FSM.Execute()
-
-if __name__ == '__main__':
-    r = FlowerBot()
-    for i in range(200):
-        startTime = clock()
-        timeInterval = 1
-        while (startTime + timeInterval > clock()):
-            pass
-        r.Execute()
-
+        
+        motors.move_vertical(600, 2700)
+        time.sleep(3)
+        motors.move_lateral(-600, 8700)
+        time.sleep(7)
+        motors.open_grabber(0)
+        time.sleep(2)
+        motors.close_grabber(0)
 

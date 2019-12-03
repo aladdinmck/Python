@@ -16,6 +16,8 @@ for i, val in enumerate(plants):
     if (val == 'G'):
         print (i, ",",val)
         print('GREEN DROPPED')
+        # move here
+        
         plants[i] = '0'
         print(plants)
 
@@ -25,5 +27,7 @@ for i, val in enumerate(plants):
     if (val == 'R'):
         print (i, ",", val)
         print('RED DROPPED')
+        # move here 
+
         plants[i] = '0'
         print(plants)
