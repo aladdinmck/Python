@@ -1,3 +1,5 @@
+# README.md 
+Don't complain about how unorganized this repo is. I wanted it to be this way. If you don't like it, go write your own code.
 
 # Python
 I created this repository in order to practice using ML python libraries.
